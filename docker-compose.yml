@@ -1,0 +1,211 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: securecloud-postgres
+    environment:
+      POSTGRES_DB: securecloud
+      POSTGRES_USER: securecloud
+      POSTGRES_PASSWORD: securecloud_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - securecloud-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U securecloud"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: securecloud-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - securecloud-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Frontend (Next.js) - Optional, can run separately with npm run dev
+  # Uncomment to include in Docker Compose
+  # web:
+  #   build:
+  #     context: ./securecloud-nextjs
+  #     dockerfile: Dockerfile
+  #   container_name: netguard-web
+  #   ports:
+  #     - "3000:3000"
+  #   environment:
+  #     - NEXT_PUBLIC_API_URL=http://localhost:8080/api/v1
+  #     - NEXT_PUBLIC_WS_URL=ws://localhost:8080/ws
+  #   depends_on:
+  #     - api-gateway
+  #   networks:
+  #     - securecloud-network
+
+  # Go API Gateway
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile
+    container_name: netguard-api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - JWT_SECRET=your-secret-key-change-in-production
+      - AUTH_SERVICE_URL=http://auth-service:8081
+      - THREAT_SERVICE_URL=http://threat-detector:8082
+      - NETWORK_SERVICE_URL=http://network-monitor:8083
+      - FIREWALL_SERVICE_URL=http://firewall-service:8084
+      - CORS_ORIGINS=http://localhost:3000
+    depends_on:
+      - auth-service
+      - threat-detector
+      - network-monitor
+      - firewall-service
+    networks:
+      - securecloud-network
+
+  # Go Auth Service
+  auth-service:
+    build:
+      context: ./services/auth-service
+      dockerfile: Dockerfile
+    container_name: netguard-auth-service
+    ports:
+      - "8081:8081"
+    environment:
+      - PORT=8081
+      - DATABASE_URL=postgresql://securecloud:securecloud_password@postgres:5432/securecloud
+      - JWT_SECRET=your-secret-key-change-in-production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - securecloud-network
+
+  # Python Threat Detector
+  threat-detector:
+    build:
+      context: ./services/threat-detector
+      dockerfile: Dockerfile
+    container_name: netguard-threat-detector
+    ports:
+      - "8082:8082"
+    environment:
+      - PORT=8082
+    networks:
+      - securecloud-network
+
+  # Python Network Monitor
+  network-monitor:
+    build:
+      context: ./services/network-monitor
+      dockerfile: Dockerfile
+    container_name: netguard-network-monitor
+    ports:
+      - "8083:8083"
+    environment:
+      - PORT=8083
+    networks:
+      - securecloud-network
+
+  # Python Firewall Service
+  firewall-service:
+    build:
+      context: ./services/firewall-service
+      dockerfile: Dockerfile
+    container_name: netguard-firewall-service
+    ports:
+      - "8084:8084"
+    environment:
+      - PORT=8084
+    networks:
+      - securecloud-network
+
+  # Prometheus Monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: securecloud-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - securecloud-network
+
+  # Grafana Dashboards
+  grafana:
+    image: grafana/grafana:latest
+    container_name: securecloud-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infrastructure/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./infrastructure/grafana/datasources:/etc/grafana/provisioning/datasources
+    depends_on:
+      - prometheus
+    networks:
+      - securecloud-network
+
+  # RabbitMQ Message Queue
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: securecloud-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=securecloud
+      - RABBITMQ_DEFAULT_PASS=securecloud_password
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - securecloud-network
+
+networks:
+  securecloud-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+  rabbitmq_data:
+
+# Updated: 2025-07-31T10:15:00
+
+# Updated: 2025-08-01T11:00:00
+
+# Updated: 2025-08-01T15:30:00
+
+# feat(docker): create docker-compose configuration - 2025-07-31
+
+# feat(infra): add PostgreSQL and Redis services - 2025-08-01
+
+# feat(infra): add Prometheus and Grafana - 2025-08-01
+
+# feat(docker): create docker-compose configuration - 2025-07-31
+
+# feat(infra): add PostgreSQL and Redis services - 2025-08-01
+
+# feat(infra): add Prometheus and Grafana - 2025-08-01
