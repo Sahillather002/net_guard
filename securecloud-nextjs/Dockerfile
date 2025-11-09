@@ -46,9 +46,3 @@ ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
 
 CMD ["node", "server.js"]
-
-# Updated: 2025-07-30T14:00:00
-
-# feat(docker): add Frontend Dockerfile - 2025-07-30
-
-# feat(docker): add Frontend Dockerfile - 2025-07-30

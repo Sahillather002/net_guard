@@ -207,19 +207,3 @@ export function AttackFlowVisualization({
     </Card>
   );
 }
-
-# Updated: 2025-07-16T14:00:00
-
-# Updated: 2025-08-20T14:00:00
-
-# Updated: 2025-08-27T09:15:00
-
-# Updated: 2025-09-23T11:30:00
-
-
-
-
-
-
-
-

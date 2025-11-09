@@ -339,11 +339,3 @@ export default function LandingPage() {
     </div>
   );
 }
-
-# Updated: 2025-08-14T14:30:00
-
-# Updated: 2025-08-14T14:30:00
-
-# Updated: 2025-07-14T14:30:00
-
-

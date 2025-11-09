@@ -32,11 +32,3 @@ export default function RootLayout({
     </html>
   );
 }
-
-# Updated: 2025-07-17T09:00:00
-
-# Updated: 2025-08-09T10:30:00
-
-
-
-

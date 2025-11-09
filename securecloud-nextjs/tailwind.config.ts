@@ -78,15 +78,3 @@ const config = {
 } satisfies Config
 
 export default config
-
-# Updated: 2025-07-17T13:30:00
-
-# Updated: 2025-08-24T14:20:00
-
-// style(frontend): add Tailwind CSS configuration - 2025-07-17
-
-// style(ui): refine color scheme - 2025-08-24
-
-// style(frontend): add Tailwind CSS configuration - 2025-07-17
-
-// style(ui): refine color scheme - 2025-08-24
