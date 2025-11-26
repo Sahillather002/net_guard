@@ -112,7 +112,6 @@ if ($LASTEXITCODE -eq 0) {
 } else {
     Write-Host "  ✗ Failed to install Frontend dependencies" -ForegroundColor Red
 }
-
 # Return to project root
 Set-Location $PSScriptRoot
 
